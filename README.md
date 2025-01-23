@@ -18,5 +18,5 @@ Given two arrays of geographic coordinates, match each point in the first array 
 - Use longitude and latitude for the KD Tree queries, followed by the distance formula for final validation.
 
 ### Resources
-The KD Tree implementation and KNN query were inspired by StableSort’s video tutorial and code.
+The KD Tree implementation was found on geeksforgeeks and KNN query was inspired by StableSort’s video tutorial and code.
 GPT used to create some base test cases. 
