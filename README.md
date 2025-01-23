@@ -19,4 +19,5 @@ Given two arrays of geographic coordinates, match each point in the first array 
 
 ### Resources
 The KD Tree implementation was found on geeksforgeeks and KNN query was inspired by StableSort’s video tutorial and code.
+
 GPT used to create some base test cases. 
