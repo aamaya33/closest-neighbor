@@ -9,9 +9,13 @@
 #Could use K-D Tree and use nearest neighbors query to find the closest point, but would i have to remake the tree every time? recalculating distance for each point in arrA?
 #plan is to use k-d tree, find k nearest neighbors and run distance formula on that. ripping most of implementation from geek4geeks
 import math 
-import unittest
+from tkinter import *
+from tkinter import filedialog
 
 k=2 #dimension of the k tree (2 since just long and lat)
+arrayA = None 
+arrayB = None 
+count = 0 
 
 class Node: 
     def __init__(self, point): 
@@ -63,6 +67,7 @@ def closestPoint(root, target, depth=0):
 
     cd = depth % k
 
+    #Compare the target point and the current point 
     if target[cd] < root.point[cd]:
         next_branch = root.left
         opposite_branch = root.right
@@ -70,10 +75,11 @@ def closestPoint(root, target, depth=0):
         next_branch = root.right
         opposite_branch = root.left
 
+    #Recursively search down the tree
     temp = closestPoint(next_branch, target, depth + 1)
     best = closest(temp, root, target)
 
-    #check to see if we should traverse down the other branch 
+    #check to see if we should traverse down the other branch (check to see if the distance of the other branch is less than the distance of the current best)
     rprime = 3963.0 * math.acos(math.sin(target[0] * math.pi / 180) * math.sin(root.point[0] * math.pi / 180) + math.cos(target[0] * math.pi / 180) * math.cos(root.point[0] * math.pi / 180) * math.cos(root.point[1] * math.pi / 180 - target[1] * math.pi / 180))
     dist = target[cd] - root.point[cd]
 
@@ -83,83 +89,83 @@ def closestPoint(root, target, depth=0):
     
     return best
 
+def openFile() -> list: 
+    '''
+    Opens file (csv, json, txt) and parses it to find longitude and latitude
 
-#tests #thankyou gpt 
-class TestKDTree(unittest.TestCase):
-    def setUp(self):
-        # Initialize test data
-        self.simple_points = [[2,3], [5,4], [9,6], [4,7], [8,1]]
-        self.geo_points = [
-            [42.3601, -71.0589],  # Boston
-            [40.7128, -74.0060],  # NYC
-            [34.0522, -118.2437], # LA
-            [41.8781, -87.6298],  # Chicago
-            [29.7604, -95.3698]   # Houston
-        ]
-        self.dest_points = [
-            [42.2626, -71.8023],  # Worcester (near Boston)
-            [40.7357, -74.1724],  # Newark (near NYC)
-            [34.1478, -118.1445], # Pasadena (near LA)
-            [41.8339, -87.8722],  # Oak Park (near Chicago)
-            [29.7355, -95.2308],  # Pasadena TX (near Houston)
-            [39.9526, -75.1652],  # Philadelphia
-            [38.9072, -77.0369]   # Washington DC
-        ]
+    Returns array which will then be used to find the closest point in arrayB for each point in arrayA
+    
+    '''
+    global arrayA
+    global arrayB
+    global count
+    array = [] 
+
+    filetypes = (
+        ('CSV files', '*.csv'),
+        ('JSON files', '*.json'),
+        ('Text files', '*.txt')
+    )
+    filepath = filedialog.askopenfilename(
+        filetypes=filetypes
+    )
+    if not filepath: 
+        return 
+    #parse file and find longitude and latitude 
+    try: 
+        with open(filepath, 'r') as file: 
+            file_extension = filepath.split('.')[-1]
+
+            if file_extension == 'txt':
+                #parse text file
+                #go through each line, split by comma, first element is latitude, second is longitude
+                #country, name, lat, lng
+                print("TXT file successfully read")
+                for line in file: 
+                    try:
+                        line = line.strip().split(',')
+                        lat, long = float(line[2]), float(line[3])
+                        array.append([lat, long])
+                    except Exception as e:
+                        try:
+                            lat, long = float(line[3]), float(line[4])
+                            array.append([lat, long])
+                        except Exception as e:
+                            print("Error parsing line: ", line, "this line will be ignored. Please make sure to format the line correctly.")   
+                count += 1        
+            if file_extension == 'csv':
+                #parse csv file
+                print("CSV successfully read")
+                print(file.read())
+                pass
+            elif file_extension == 'json':
+                print("json read")
+                print(file.read())
+                pass
+    except Exception as e:
+        print(e)
+    finally:
+        file.close() 
         
-    def test_tree_construction(self):
-        root = None
-        for point in self.simple_points:
-            root = insert(root, point)
-        self.assertEqual(root.point, [2,3])
-        self.assertEqual(root.right.point, [5,4])
-        
-    def test_empty_tree(self):
-        root = None
-        result = closestPoint(root, [1,1])
-        self.assertIsNone(result)
-        
-    def test_single_node(self):
-        root = None
-        root = insert(root, [1,1])
-        result = closestPoint(root, [2,2])
-        self.assertEqual(result.point, [1,1])
-        
-    def test_nearest_neighbor_simple(self):
-        root = None
-        for point in self.simple_points:
-            root = insert(root, point)
-        target = [3,4]
-        result = closestPoint(root, target)
-        self.assertEqual(result.point, [2,3])
-        
-    def test_nearest_neighbor_geo(self):
-        root = None
-        for point in self.geo_points:
-            root = insert(root, point)
-        # Query point near NYC
-        target = [40.7, -74.0]
-        result = closestPoint(root, target)
-        self.assertEqual(result.point, [40.7128, -74.0060])
-    def test_nearest_city_matching(self):
-        root = None
-        # Build KD-tree with destination points
-        for point in self.dest_points:
-            root = insert(root, point)
-            
-        # Test each source point
-        matches = []
-        for source in self.geo_points:
-            nearest = closestPoint(root, source)
-            matches.append((source, nearest.point))
-            
-        # Verify expected matches
-        self.assertEqual(matches[0][1], [42.2626, -71.8023])  # Boston -> Worcester
-        self.assertEqual(matches[1][1], [40.7357, -74.1724])  # NYC -> Newark
-        self.assertEqual(matches[2][1], [34.1478, -118.1445]) # LA -> Pasadena
+    if count == 1:
+        arrayA = array
+        print("ArrayA updated: ", arrayA)
+    elif count == 2: 
+        arrayB = array
+        print("ArrayB updated: ", arrayB)
+    else:
+        print("Error: too many files uploaded. Please upload only 2 files.")
+        return
+    return array
 
 if __name__ == '__main__':
-    unittest.main()
-
+    #assume second input will be arrayb 
+    window = Tk()
+    upload_button = Button(text = "Open File", command = openFile)
+    close_button = Button(text = "Quit", command = window.quit)
+    upload_button.pack()
+    close_button.pack()
+    window.mainloop()
 
 
 
