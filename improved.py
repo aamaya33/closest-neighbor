@@ -15,7 +15,8 @@ from tkinter import filedialog
 k=2 #dimension of the k tree (2 since just long and lat)
 arrayA = None 
 arrayB = None 
-count = 0 
+count = 0 #count of files uploaded
+calculate_button = None 
 
 class Node: 
     def __init__(self, point): 
@@ -146,26 +147,47 @@ def openFile() -> list:
         print(e)
     finally:
         file.close() 
-        
+
     if count == 1:
         arrayA = array
         print("ArrayA updated: ", arrayA)
     elif count == 2: 
         arrayB = array
+        calculate_button.config(state = NORMAL)
         print("ArrayB updated: ", arrayB)
     else:
         print("Error: too many files uploaded. Please upload only 2 files.")
         return
     return array
 
+def find_closest_point(arrayA, arrayB):
+    '''
+    Find the closest point in arrayB for each point in arrayA
+
+    Returns array of tuples where each tuple contains the point in arrayA and the closest point in arrayB
+    '''
+    root = None 
+    for point in arrayB:
+        root = insert(root, point)
+    matches = []
+    for source in arrayA:
+        nearest = closestPoint(root, source)
+        matches.append((source, nearest.point))
+    return matches
+
 if __name__ == '__main__':
     #assume second input will be arrayb 
     window = Tk()
     upload_button = Button(text = "Open File", command = openFile)
+    status = Label(text = "Upload two files to find the closest point in the second array for each point in the first array.")
+    calculate_button = Button(text = "Calculate", command = lambda: print(find_closest_point(arrayA, arrayB)), state=DISABLED)
     close_button = Button(text = "Quit", command = window.quit)
+    status.pack()
+    calculate_button.pack()
     upload_button.pack()
     close_button.pack()
     window.mainloop()
+    
 
 
 
