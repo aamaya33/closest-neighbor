@@ -95,9 +95,9 @@ def closestPoint(root, target, depth=0):
     if rprime >= dist * dist: 
         temp = closestPoint(opposite_branch, target, depth + 1)
         best = closest(temp, best, target)
-    
-    return best
 
+    return best
+#FIXME: Add functionality to handle degree minute seconds for coordinates (currently it just says to make it long and lat)
 def openFile() -> list: 
     '''
     Opens file (csv, json, txt) and parses it to find longitude and latitude
@@ -140,17 +140,22 @@ def openFile() -> list:
                             lat, long = float(line[3]), float(line[4])
                             array.append([lat, long])
                         except Exception as e:
-                            print("Error parsing line: ", line, "this line will be ignored. Please make sure to format the line correctly.")   
+                            print("Error parsing line: ", line, "this line will be ignored. Please make sure to format the line correctly (e.g. -22.1892, 29.1269).")   
                 count += 1        
             if file_extension == 'csv':
                 #parse csv file
                 print("CSV successfully read")
-                print(file.read())
+                for line in file: 
+                    print(line)
+                    try: 
+                        #here we're going to assume that the long, lat is at the end of the line 
+                        line = [clean_string_csv(value) for value in line.strip().split(',')]
+                        print(line)
+                        lat, long = float(line[-2]), float(line[-1])
+                        array.append([lat, long])
+                    except Exception as e:
+                        print("Error: ", e, "this line will be ignored. Please make sure to format the line correctly (e.g. -22.1892, 29.1269).")   
                 count += 1 
-            elif file_extension == 'json':
-                print("json read")
-                print(file.read())
-                pass
     except Exception as e:
         print(e)
     finally:
@@ -158,11 +163,11 @@ def openFile() -> list:
 
     if count == 1:
         arrayA = array
-        print("ArrayA updated: ", arrayA)
+        print("ArrayA updated")
     elif count == 2: 
         arrayB = array
         calculate_button.config(state = NORMAL)
-        print("ArrayB updated: ", arrayB)
+        print("ArrayB updated")
     else:
         print("Error: too many files uploaded. Please upload only 2 files. Terminating program.")
         window.quit()
@@ -182,13 +187,23 @@ def find_closest_point(arrayA, arrayB):
     for source in arrayA:
         nearest = closestPoint(root, source)
         matches.append((source, nearest.point))
+
+    #FIXME: Actually tell the user what two places are closest instead of just printing the coordinates (readability)
+    print("Here are the closest points: \n\n", matches)
     return matches
+
+def clean_string_csv(value) -> str: 
+    '''
+    Removes quotations from string
+    '''
+    return value.strip().replace('"', '')
 
 if __name__ == '__main__':
     #assume second input will be arrayb 
     window = Tk()
     upload_button = Button(text = "Open File", command = openFile)
     status = Label(text = "Upload two files to find the closest point in the second array for each point in the first array.")
+    #FIXME: once the calculate button is pressed, reset file count to 0 
     calculate_button = Button(text = "Calculate", command = lambda: print(find_closest_point(arrayA, arrayB)), state=DISABLED)
     close_button = Button(text = "Quit", command = window.quit)
     status.pack()
