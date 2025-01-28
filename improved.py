@@ -146,18 +146,18 @@ def openFile() -> list:
                 #parse csv file
                 print("CSV successfully read")
                 for line in file: 
-                    print(line)
+                    # print(line)
                     try: 
                         #here we're going to assume that the long, lat is at the end of the line 
                         line = [clean_string_csv(value) for value in line.strip().split(',')]
-                        print(line)
+                        # print(line)
                         lat, long = float(line[-2]), float(line[-1])
                         array.append([lat, long])
                     except Exception as e:
                         print("Error: ", e, "this line will be ignored. Please make sure to format the line correctly (e.g. -22.1892, 29.1269).")   
                 count += 1 
     except Exception as e:
-        print(e)
+        print("Error: ", e)
     finally:
         file.close() 
 
