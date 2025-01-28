@@ -54,9 +54,13 @@ def closest(temp,root,target):
     lat1, long1 = temp.point[0] * math.pi / 180, temp.point[1] * math.pi / 180
     lat2, long2 = target[0] * math.pi / 180, target[1] * math.pi / 180
     lat3, long3 =root.point[0] * math.pi / 180, root.point[1] * math.pi / 180
-
-    d1 = 3963.0 * math.acos(math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(long2 - long1))
-    d2 = 3963.0 * math.acos(math.sin(lat3) * math.sin(lat2) + math.cos(lat3) * math.cos(lat2) * math.cos(long2 - long3))
+    
+    expression1 = math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(long2 - long1)
+    expression2 = math.sin(lat3) * math.sin(lat2) + math.cos(lat3) * math.cos(lat2) * math.cos(long2 - long3)
+  
+    #FIXME: if there is a locaiton in both of the arrays, you'll get an out of bounds error here 
+    d1 = 3963.0 * math.acos(expression1)
+    d2 = 3963.0 * math.acos(expression2)
     
     
     return temp if d1 < d2 else root
@@ -81,6 +85,10 @@ def closestPoint(root, target, depth=0):
     best = closest(temp, root, target)
 
     #check to see if we should traverse down the other branch (check to see if the distance of the other branch is less than the distance of the current best)
+    expression = math.sin(target[0] * math.pi / 180) * math.sin(root.point[0] * math.pi / 180) + math.cos(target[0] * math.pi / 180) * math.cos(root.point[0] * math.pi / 180) * math.cos(root.point[1] * math.pi / 180 - target[1] * math.pi / 180)
+    if expression >= 1: 
+        expression = 0.98
+    #FIXME: if there is a locaiton in both of the arrays, you'll get an out of bounds error here 
     rprime = 3963.0 * math.acos(math.sin(target[0] * math.pi / 180) * math.sin(root.point[0] * math.pi / 180) + math.cos(target[0] * math.pi / 180) * math.cos(root.point[0] * math.pi / 180) * math.cos(root.point[1] * math.pi / 180 - target[1] * math.pi / 180))
     dist = target[cd] - root.point[cd]
 
@@ -138,7 +146,7 @@ def openFile() -> list:
                 #parse csv file
                 print("CSV successfully read")
                 print(file.read())
-                pass
+                count += 1 
             elif file_extension == 'json':
                 print("json read")
                 print(file.read())
@@ -156,7 +164,8 @@ def openFile() -> list:
         calculate_button.config(state = NORMAL)
         print("ArrayB updated: ", arrayB)
     else:
-        print("Error: too many files uploaded. Please upload only 2 files.")
+        print("Error: too many files uploaded. Please upload only 2 files. Terminating program.")
+        window.quit()
         return
     return array
 
