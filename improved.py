@@ -2,6 +2,9 @@
 # first array to the closest one in the second array
 # distance between longitude and latitude given by haversine (geek4geeks)
 # use k-d tree, find k nearest neighbors, calculate distance (geeks4geeks).
+# use basemap to plot the points on a map 
+from mpl_toolkits.basemap import Basemap
+import matplotlib.pyplot as plt
 import math
 import tkinter as tk
 from tkinter import filedialog
