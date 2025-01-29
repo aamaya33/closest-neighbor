@@ -18,7 +18,6 @@ from tkinter import filedialog
 k = 2  # dimension of the k tree (2 since just long and lat)
 arrayA = None
 arrayB = None
-count = 0  # count of files uploaded
 calculate_button = None
 
 
@@ -141,7 +140,7 @@ def openFile() -> list:
         return
     # parse file and find longitude and latitude
     try:
-        with open(filepath, 'r') as file:
+        with open(filepath, 'r', errors='ignore') as file:
             file_extension = filepath.split('.')[-1]
 
             if file_extension == 'txt':
@@ -160,7 +159,6 @@ def openFile() -> list:
                             array.append([lat, long])
                         except Exception:
                             print("Error parsing line: ", line, "\nThis line will be ignored. Please make sure to format the line correctly (e.g. -22.1892, 29.1269).")
-                count += 1
             if file_extension == 'csv':
                 # parse csv file
                 print("CSV successfully read")
@@ -174,20 +172,19 @@ def openFile() -> list:
                         array.append([lat, long])
                     except Exception as e:
                         print("Error: ", e, "this line will be ignored. Please make sure to format the line correctly (e.g. -22.1892, 29.1269).")
-                count += 1
     except Exception as e:
         print("Error: ", e)
     finally:
         file.close()
 
-    if count == 1:
+    if not arrayA:
         arrayA = array
-        print("ArrayA updated")
-    elif count == 2:
+        print("ArrayA updated", arrayA)
+    elif not arrayB:
         arrayB = array
         # calculate_button.config(state=tk.NORMAL)
         plot_button.config(state=tk.NORMAL)
-        print("ArrayB updated")
+        print("ArrayB updated", arrayB)
     else:
         print("Error: too many files uploaded. Please upload only 2 files. Terminating program.")
         window.quit()
@@ -257,7 +254,7 @@ def plot_closest_coordinates(arrayA, arrayB):
     )
 
     df = pd.concat([dfA, dfB], ignore_index=True)
-    fig = px.scatter_map(df, lat="Latitude", lon="Longitude", color="Dataset", color_discrete_sequence=["red", "green", "blue"], zoom=4)
+    fig = px.scatter_map(df, lat="Latitude", lon="Longitude", color="Dataset", color_discrete_sequence=["red", "blue", "green"], zoom=4)
     for match in matches:
         pointA = match[0]  # Point in arrayA
         pointB = match[1]  # Closest point in arrayB
