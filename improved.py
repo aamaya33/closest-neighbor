@@ -2,8 +2,13 @@
 # first array to the closest one in the second array
 # distance between longitude and latitude given by haversine (geek4geeks)
 # use k-d tree, find k nearest neighbors, calculate distance (geeks4geeks).
-# use basemap to plot the points on a map 
-from mpl_toolkits.basemap import Basemap
+# use basemap to plot the points on a map
+
+# TO BE DONE plot out the points from array A in one color and B in another color.
+# for the closest points, change the color of the point in array B to a
+# differernt color and draw a line between the two points
+import pandas as pd
+import plotly.express as px
 import matplotlib.pyplot as plt
 import math
 import tkinter as tk
@@ -180,6 +185,7 @@ def openFile() -> list:
     elif count == 2:
         arrayB = array
         calculate_button.config(state=tk.NORMAL)
+        plot_button.config(state=tk.NORMAL)
         print("ArrayB updated")
     else:
         print("Error: too many files uploaded. Please upload only 2 files. Terminating program.")
@@ -204,14 +210,26 @@ def find_closest_point(arrayA, arrayB):
 
     # FIXME: Actually tell the user what two places are closest instead of just printing the coordinates (readability)
     print("Here are the closest points: \n\n", matches)
+    # FIXME: Plot the new points (call the plot function)
     return matches
 
 
-def clean_string_csv(value) -> str:
+def clean_string_csv(value):
     '''
     Removes quotations from string
     '''
     return value.strip().replace('"', '')
+
+def plot_coordinates(arrayA, arrayB):
+    '''
+    Plots the coordinates on a map
+    '''
+    dfA = pd.DataFrame(arrayA, columns=['Latitude', 'Longitude'])
+    dfB = pd.DataFrame(arrayB, columns=['Latitude', 'Longitude'])
+    fig = px.scatter_map(dfA, lat="Latitude", lon="Longitude", color_discrete_sequence=["red"], zoom=4)
+    fig.update_layout(map_style="carto-darkmatter")
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.show()
 
 
 if __name__ == '__main__':
@@ -224,8 +242,10 @@ if __name__ == '__main__':
     # FIXME: plot the coordinates on a map?
     calculate_button = tk.Button(text="Calculate", command=lambda: print(find_closest_point(arrayA, arrayB)), state=tk.DISABLED)
     close_button = tk.Button(text="Quit", command=window.quit)
+    plot_button = tk.Button(text="Plot", command=lambda: plot_coordinates(arrayA, arrayB), state=tk.DISABLED)
     status.pack()
     calculate_button.pack()
+    plot_button.pack()
     upload_button.pack()
     close_button.pack()
     window.mainloop()
