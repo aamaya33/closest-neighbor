@@ -9,6 +9,7 @@
 # differernt color and draw a line between the two points
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import math
 import tkinter as tk
@@ -184,7 +185,7 @@ def openFile() -> list:
         print("ArrayA updated")
     elif count == 2:
         arrayB = array
-        calculate_button.config(state=tk.NORMAL)
+        # calculate_button.config(state=tk.NORMAL)
         plot_button.config(state=tk.NORMAL)
         print("ArrayB updated")
     else:
@@ -226,11 +227,50 @@ def plot_coordinates(arrayA, arrayB):
     '''
     dfA = pd.DataFrame(arrayA, columns=['Latitude', 'Longitude'])
     dfB = pd.DataFrame(arrayB, columns=['Latitude', 'Longitude'])
-    fig = px.scatter_map(dfA, lat="Latitude", lon="Longitude", color_discrete_sequence=["red"], zoom=4)
+    dfA['Dataset'] = 'Input Array A'
+    dfB['Dataset'] = 'Input Array B'
+    df = pd.concat([dfA, dfB], ignore_index=True)
+    fig = px.scatter_map(df, lat="Latitude", lon="Longitude", color="Dataset", color_discrete_sequence=["red", "blue"], zoom=4)
     fig.update_layout(map_style="carto-darkmatter")
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     fig.show()
 
+def plot_closest_coordinates(arrayA, arrayB):
+    '''
+    Plots coordinates from A and B and changes the colors of closest points to green
+    and draws a line between the two points
+    '''
+
+    matches = find_closest_point(arrayA, arrayB)
+    dfA = pd.DataFrame(arrayA, columns=['Latitude', 'Longitude'])
+    dfB = pd.DataFrame(arrayB, columns=['Latitude', 'Longitude'])
+    dfA['Dataset'] = 'Input Array A'
+    dfB['Dataset'] = 'Input Array B'
+
+    # iterate through matches and arrayB to change the color of the closest points
+
+    # got this snipper from deepseek, set for quick lookup
+    closest_points = {tuple(match[1]) for match in matches}
+    dfB['Dataset'] = dfB.apply(
+        lambda row: 'Closest Point' if (row['Latitude'], row['Longitude']) in closest_points else row['Dataset'],
+        axis=1
+    )
+
+    df = pd.concat([dfA, dfB], ignore_index=True)
+    fig = px.scatter_map(df, lat="Latitude", lon="Longitude", color="Dataset", color_discrete_sequence=["red", "green", "blue"], zoom=4)
+    for match in matches:
+        pointA = match[0]  # Point in arrayA
+        pointB = match[1]  # Closest point in arrayB
+        fig.add_trace(go.Scattermap(
+            mode="lines",
+            lon=[pointA[1], pointB[1]],  # Longitude values
+            lat=[pointA[0], pointB[0]],  # Latitude values
+            line=dict(color="yellow", width=2),  # Line color and width
+            showlegend=False  # Hide legend for lines
+        ))
+    fig.update_layout(map_style="carto-darkmatter")
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.show()
 
 if __name__ == '__main__':
     # assume second input will be arrayb
@@ -240,11 +280,11 @@ if __name__ == '__main__':
     # FIXME: once the calculate button is pressed, reset file count to 0
     # FIXME: add a clear button to reset the program
     # FIXME: plot the coordinates on a map?
-    calculate_button = tk.Button(text="Calculate", command=lambda: print(find_closest_point(arrayA, arrayB)), state=tk.DISABLED)
+    # calculate_button = tk.Button(text="Calculate", command=lambda: print(find_closest_point(arrayA, arrayB)), state=tk.DISABLED)
     close_button = tk.Button(text="Quit", command=window.quit)
-    plot_button = tk.Button(text="Plot", command=lambda: plot_coordinates(arrayA, arrayB), state=tk.DISABLED)
+    plot_button = tk.Button(text="Plot", command=lambda: plot_closest_coordinates(arrayA, arrayB), state=tk.DISABLED)
     status.pack()
-    calculate_button.pack()
+    # calculate_button.pack()
     plot_button.pack()
     upload_button.pack()
     close_button.pack()
