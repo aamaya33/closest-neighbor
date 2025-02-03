@@ -14,6 +14,10 @@ import matplotlib.pyplot as plt
 import math
 import tkinter as tk
 from tkinter import filedialog
+import cProfile
+import tracemalloc
+import pstats
+import re
 
 k = 2  # dimension of the k tree (2 since just long and lat)
 arrayA = None
@@ -179,12 +183,12 @@ def openFile() -> list:
 
     if not arrayA:
         arrayA = array
-        print("ArrayA updated", arrayA)
+        print("ArrayA updated successfully")
     elif not arrayB:
         arrayB = array
         # calculate_button.config(state=tk.NORMAL)
         plot_button.config(state=tk.NORMAL)
-        print("ArrayB updated", arrayB)
+        print("ArrayB updated successfully")
     else:
         print("Error: too many files uploaded. Please upload only 2 files. Terminating program.")
         window.quit()
@@ -205,9 +209,6 @@ def find_closest_point(arrayA, arrayB):
     for source in arrayA:
         nearest = closestPoint(root, source)
         matches.append((source, nearest.point))
-
-    # FIXME: Actually tell the user what two places are closest instead of just printing the coordinates (readability)
-    print("Here are the closest points: \n\n", matches)
     # FIXME: Plot the new points (call the plot function)
     return matches
 
@@ -286,3 +287,9 @@ if __name__ == '__main__':
     upload_button.pack()
     close_button.pack()
     window.mainloop()
+
+cProfile.run('openFile()', 'improved.prof')
+cProfile.run('find_closest_point(arrayA, arrayB)', 'improved.prof')
+cProfile.run('plot_closest_coordinates(arrayA, arrayB)', 'improved.prof')
+p = pstats.Stats('improved.prof')
+print(p)
