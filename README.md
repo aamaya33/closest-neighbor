@@ -1,5 +1,6 @@
 # EC530-Assignment1
 [![Python Tests](https://github.com/aamaya33/closest-neighbor/actions/workflows/python-package-conda.yml/badge.svg)](https://github.com/aamaya33/closest-neighbor/actions/workflows/python-package-conda.yml)
+
 **Collaborator:** Logan Lechuga
 
 ## Problem Statement
