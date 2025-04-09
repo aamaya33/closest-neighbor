@@ -11,7 +11,7 @@ setup(
         "pandas >= 2.2.2",
         "plotly >= 5.22",
         "matplotlib >= 3.8.4",
-        "tk >= 8.6.14",
+        "tk >= 0.1.0",
     ],
     tests_require=[
         "pytest >= 7.0.0",
