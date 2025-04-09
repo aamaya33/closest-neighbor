@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 import math
 import tkinter as tk
 from tkinter import filedialog
-import cProfile
-import tracemalloc
-import pstats
-import re
+# import cProfile
+# import tracemalloc
+# import pstats
+# import re
 
 k = 2  # dimension of the k tree (2 since just long and lat)
 arrayA = None
@@ -288,8 +288,8 @@ if __name__ == '__main__':
     close_button.pack()
     window.mainloop()
 
-cProfile.run('openFile()', 'improved.prof')
-cProfile.run('find_closest_point(arrayA, arrayB)', 'improved.prof')
-cProfile.run('plot_closest_coordinates(arrayA, arrayB)', 'improved.prof')
-p = pstats.Stats('improved.prof')
-print(p)
+# cProfile.run('openFile()', 'improved.prof')
+# cProfile.run('find_closest_point(arrayA, arrayB)', 'improved.prof')
+# cProfile.run('plot_closest_coordinates(arrayA, arrayB)', 'improved.prof')
+# p = pstats.Stats('improved.prof')
+# print(p)
